@@ -1,0 +1,1520 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#f4f7f2">
+	<title>Rarity — find your people</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			color-scheme: light;
+			--paper: #f3f6f0;
+			--ink: #17251e;
+			--muted: #77827b;
+			--line: #dce4dc;
+			--green: #c4f36a;
+			--green-deep: #3e6a29;
+			--blue: #c7e8f1;
+			--coral: #ef856b;
+			--yellow: #f2c95d;
+			--card: #fffefa;
+			--serif: "Fraunces", Georgia, "Times New Roman", serif;
+			--sans: "DM Sans", "Avenir Next", Avenir, "Segoe UI", sans-serif;
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			min-width: 320px;
+			min-height: 100vh;
+			background:
+				radial-gradient(ellipse at 8% 5%, #e8eee3 0, transparent 31%),
+				var(--paper);
+			color: var(--ink);
+			font-family: var(--sans);
+			-webkit-font-smoothing: antialiased;
+		}
+
+		button { color: inherit; font: inherit; }
+
+		.app-shell {
+			width: min(1680px, 100%);
+			min-height: 100vh;
+			margin: 0 auto;
+			padding: 0 clamp(24px, 3.25vw, 58px) 52px;
+		}
+
+		.topbar {
+			height: 82px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.brand {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			color: var(--ink);
+			font-size: 20px;
+			font-weight: 750;
+			letter-spacing: 0;
+			text-decoration: none;
+		}
+
+		.brand-mark {
+			display: grid;
+			width: 31px;
+			aspect-ratio: 1;
+			place-items: center;
+			border-radius: 50%;
+			background: var(--green);
+			color: var(--ink);
+			font-family: var(--serif);
+			font-size: 21px;
+			font-style: italic;
+			font-weight: 700;
+		}
+
+		.top-note {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			color: #59655e;
+			font-size: 12px;
+			font-weight: 600;
+		}
+
+		.live-dot {
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: #76b446;
+			box-shadow: 0 0 0 4px #76b4461c;
+		}
+
+		.workspace {
+			display: grid;
+			grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) 160px;
+			gap: clamp(22px, 2.5vw, 42px);
+			padding-top: clamp(30px, 3vw, 46px);
+		}
+
+		.controls { padding-top: 8px; }
+
+		.trait-search {
+			position: relative;
+			z-index: 4;
+			margin-top: 20px;
+		}
+
+		.search-field {
+			height: 43px;
+			display: flex;
+			align-items: center;
+			gap: 9px;
+			padding: 0 11px;
+			border: 1px solid #cfd9cc;
+			border-radius: 6px;
+			background: #fffefa;
+			box-shadow: 0 3px 10px #263a2408;
+			transition: border-color 160ms ease, box-shadow 160ms ease;
+		}
+
+		.search-field:focus-within { border-color: #8aa56e; box-shadow: 0 0 0 3px #89a96b21; }
+		.search-icon { width: 17px; height: 17px; flex: none; color: #77847a; }
+
+		.search-input {
+			width: 100%;
+			min-width: 0;
+			padding: 0;
+			border: 0;
+			outline: 0;
+			background: transparent;
+			color: var(--ink);
+			font-size: 12px;
+		}
+
+		.search-input::placeholder { color: #929d93; }
+
+		.search-clear {
+			width: 23px;
+			height: 23px;
+			flex: none;
+			display: grid;
+			place-items: center;
+			padding: 0;
+			border: 0;
+			border-radius: 50%;
+			background: transparent;
+			color: #718073;
+			cursor: pointer;
+			font-size: 17px;
+		}
+
+		.search-clear:hover { background: #edf2e9; color: var(--ink); }
+		.search-clear[hidden] { display: none; }
+
+		.search-results {
+			position: absolute;
+			top: calc(100% + 6px);
+			right: 0;
+			left: 0;
+			max-height: 320px;
+			overflow-y: auto;
+			padding: 5px;
+			border: 1px solid #d8e1d5;
+			border-radius: 7px;
+			background: #fffefa;
+			box-shadow: 0 12px 28px #2133231a;
+			scrollbar-color: #c9d5c4 transparent;
+			scrollbar-width: thin;
+		}
+
+		.search-results[hidden] { display: none; }
+
+		.search-result {
+			width: 100%;
+			min-height: 43px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 6px 8px;
+			border: 0;
+			border-radius: 4px;
+			background: transparent;
+			cursor: pointer;
+			text-align: left;
+		}
+
+		.search-result:hover, .search-result:focus-visible { outline: 0; background: #eef3e9; }
+		.search-result-icon { width: 25px; flex: none; color: #71846b; font-family: var(--serif); font-size: 17px; text-align: center; }
+		.search-result-copy { min-width: 0; flex: 1; }
+		.search-result-title { display: block; overflow: hidden; color: #2b3b31; font-size: 11px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+		.search-result-meta { display: block; margin-top: 2px; color: #89958b; font-size: 9px; }
+		.search-result-arrow { color: #91a08e; font-size: 14px; }
+		.search-empty { margin: 0; padding: 15px 10px; color: #7b877d; font-size: 11px; text-align: center; }
+
+		.eyebrow {
+			margin: 0;
+			color: var(--muted);
+			font-size: 10px;
+			font-weight: 750;
+			letter-spacing: 1.25px;
+			text-transform: uppercase;
+		}
+
+		.control-title {
+			margin: 9px 0 8px;
+			font-family: var(--serif);
+			font-size: 30px;
+			font-weight: 400;
+			line-height: 1.08;
+		}
+
+		.control-subtitle {
+			max-width: 260px;
+			margin: 0;
+			color: #707b73;
+			font-size: 13px;
+			line-height: 1.55;
+		}
+
+		.category-list {
+			display: grid;
+			gap: 5px;
+			max-height: 405px;
+			overflow-y: auto;
+			margin-top: 29px;
+			padding-right: 4px;
+			scrollbar-color: #c9d5c4 transparent;
+			scrollbar-width: thin;
+		}
+
+		.category-button {
+			width: 100%;
+			min-height: 48px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 0 12px;
+			border: 1px solid transparent;
+			border-radius: 7px;
+			background: transparent;
+			cursor: pointer;
+			text-align: left;
+			transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+		}
+
+		.category-button:hover { background: #eaf0e8; }
+		.category-button:active { transform: scale(.985); }
+
+		.category-button[aria-pressed="true"] {
+			border-color: #dce5d7;
+			background: var(--card);
+		}
+
+		.category-icon {
+			width: 25px;
+			color: #52635a;
+			font-family: var(--serif);
+			font-size: 20px;
+			text-align: center;
+		}
+
+		.category-name {
+			flex: 1;
+			font-size: 13px;
+			font-weight: 650;
+		}
+
+		.category-status {
+			min-width: 18px;
+			color: #879188;
+			font-size: 11px;
+			text-align: right;
+		}
+
+		.category-status.is-set { color: var(--green-deep); font-weight: 750; }
+
+		.trait-panel {
+			min-height: 174px;
+			margin-top: 19px;
+			padding: 18px 16px 15px;
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			background: #eef2eb;
+			animation: panel-in 220ms ease both;
+		}
+
+		@keyframes panel-in {
+			from { opacity: 0; transform: translateY(5px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		.trait-panel-head {
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			gap: 10px;
+			margin-bottom: 13px;
+		}
+
+		.trait-panel-title { margin: 0; font-size: 12px; font-weight: 750; }
+		.trait-panel-hint { color: #879188; font-size: 10px; }
+
+		.trait-options {
+			max-height: 186px;
+			display: flex;
+			flex-wrap: wrap;
+			align-content: flex-start;
+			gap: 7px;
+			overflow-y: auto;
+			padding: 1px 3px 3px 1px;
+			scrollbar-color: #c9d5c4 transparent;
+			scrollbar-width: thin;
+		}
+
+		.trait-chip {
+			min-height: 31px;
+			padding: 0 11px;
+			border: 1px solid #d5ded4;
+			border-radius: 5px;
+			background: var(--card);
+			color: #4d5b52;
+			cursor: pointer;
+			font-size: 11px;
+			font-weight: 600;
+			transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease;
+		}
+
+		.trait-chip:hover { border-color: #8caa76; transform: translateY(-1px); }
+		.trait-chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: white; }
+
+		.clear-category {
+			margin-top: 12px;
+			padding: 3px 0;
+			border: 0;
+			background: transparent;
+			color: #77827b;
+			cursor: pointer;
+			font-size: 10px;
+			text-decoration: underline;
+			text-decoration-color: #b8c1b8;
+			text-underline-offset: 3px;
+		}
+
+		.stage {
+			position: relative;
+			min-width: 0;
+			min-height: 680px;
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 20px 28px 29px;
+			border: 1px solid #dce5d9;
+			border-radius: 10px;
+			background:
+				radial-gradient(ellipse at 50% 53%, #e2eed4 0%, #f0f4e9 36%, #fbfcf7 76%);
+			box-shadow: 0 12px 36px #33452f08, inset 0 1px #ffffffb8;
+			text-align: center;
+		}
+
+		.stage::before, .stage::after {
+			position: absolute;
+			z-index: 0;
+			width: 225px;
+			height: 225px;
+			border: 1px solid #c9d5c42b;
+			border-radius: 50%;
+			content: "";
+			pointer-events: none;
+		}
+
+		.stage::before { top: 35%; left: -150px; }
+		.stage::after { right: -140px; bottom: 9%; width: 290px; height: 290px; }
+
+		.stage > * { position: relative; z-index: 1; }
+
+		.stage-kicker {
+			display: inline-flex;
+			align-items: center;
+			gap: 7px;
+			margin-top: 4px;
+			color: #66736a;
+			font-size: 11px;
+			font-weight: 650;
+		}
+
+		.sparkle { color: #7c9c50; font-size: 13px; }
+
+		.sound-toggle {
+			position: absolute;
+			top: 16px;
+			right: 18px;
+			z-index: 3;
+			width: 34px;
+			height: 34px;
+			display: grid;
+			place-items: center;
+			padding: 0;
+			border: 1px solid #dce5d8;
+			border-radius: 50%;
+			background: #fffefad9;
+			color: #637267;
+			cursor: pointer;
+			transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease;
+		}
+
+		.sound-toggle:hover { border-color: #9eae92; background: #ffffff; color: var(--ink); transform: translateY(-1px); }
+		.sound-toggle:focus-visible { outline: 2px solid #719b63; outline-offset: 2px; }
+		.sound-toggle svg { width: 16px; height: 16px; }
+		.sound-toggle .sound-mute { display: none; }
+		.sound-toggle[aria-pressed="false"] .sound-wave { display: none; }
+		.sound-toggle[aria-pressed="false"] .sound-mute { display: block; }
+
+		.rarity-description {
+			min-height: 17px;
+			margin: 15px 0 -5px;
+			color: #53665a;
+			font-size: 12px;
+			font-weight: 650;
+			transition: opacity 180ms ease;
+		}
+
+		.population {
+			margin: 8px 0 0;
+			color: var(--ink);
+			font-family: var(--serif);
+			font-size: clamp(52px, 6.1vw, 88px);
+			font-weight: 400;
+			letter-spacing: 0;
+			line-height: 1;
+			font-variant-numeric: tabular-nums;
+			white-space: nowrap;
+		}
+
+		.population-caption {
+			margin: 10px 0 0;
+			color: #68756c;
+			font-size: 12px;
+		}
+
+		.avatar-scene {
+			position: relative;
+			width: min(100%, 410px);
+			height: 370px;
+			display: grid;
+			place-items: center;
+			margin-top: 1px;
+			isolation: isolate;
+		}
+
+		.avatar-halo {
+			position: absolute;
+			z-index: -1;
+			top: 38px;
+			width: 320px;
+			height: 320px;
+			border-radius: 50%;
+			background: #d9e9c5;
+			transition: background 450ms ease, transform 600ms ease;
+		}
+
+		.avatar-halo::before, .avatar-halo::after {
+			position: absolute;
+			inset: -17px;
+			border: 1px solid #7b965c26;
+			border-radius: 50%;
+			content: "";
+		}
+
+		.avatar-halo::after { inset: -35px; border-color: #7b965c17; }
+
+		.avatar-scene[data-vibe="soft"] .avatar-halo { background: #d7e9e7; }
+		.avatar-scene[data-vibe="bright"] .avatar-halo { background: #f0e4b8; }
+		.avatar-scene[data-vibe="bold"] .avatar-halo { background: #f2d1c3; }
+
+		.orbit-dot {
+			position: absolute;
+			width: 10px;
+			height: 10px;
+			border-radius: 50%;
+			background: var(--coral);
+			animation: orbit 8s linear infinite;
+		}
+
+		.orbit-dot.one { top: 73px; left: 50px; width: 8px; height: 8px; background: #e89c59; }
+		.orbit-dot.two { top: 145px; right: 31px; width: 12px; height: 12px; background: #8abac2; animation-delay: -3s; }
+		.orbit-dot.three { right: 77px; bottom: 74px; width: 7px; height: 7px; background: #9eae70; animation-delay: -5s; }
+
+		@keyframes orbit {
+			0%, 100% { transform: translateY(0) scale(1); }
+			50% { transform: translateY(-10px) scale(.78); }
+		}
+
+		.avatar-shadow {
+			position: absolute;
+			bottom: 22px;
+			width: 205px;
+			height: 24px;
+			border-radius: 50%;
+			background: #51664c1c;
+			filter: blur(7px);
+			animation: shadow-breathe 3.2s ease-in-out infinite;
+		}
+
+		@keyframes shadow-breathe { 50% { transform: scaleX(.84); opacity: .65; } }
+
+		.avatar {
+			width: 340px;
+			height: 415px;
+			overflow: visible;
+			animation: float 3.2s ease-in-out infinite;
+			transform-origin: center bottom;
+			filter: drop-shadow(0 14px 10px #34493412);
+		}
+
+		@keyframes float { 0%, 100% { transform: translateY(0) scaleY(var(--body-scale, 1)); } 50% { transform: translateY(-8px) scaleY(var(--body-scale, 1)); } }
+
+		.avatar .skin { fill: var(--skin, #bd795b); transition: fill 400ms ease; }
+		.avatar .hair { fill: var(--hair, #392e2b); transition: fill 400ms ease; }
+		.avatar .shirt { fill: var(--shirt, #ef856b); transition: fill 400ms ease; }
+		.avatar .eye { fill: var(--eye, #302a27); transition: fill 400ms ease; }
+		.avatar .glasses, .avatar .freckles, .avatar .curl-accent { opacity: 0; transition: opacity 250ms ease; }
+		.avatar .long-hair, .avatar .sideburns, .avatar .headband, .avatar .topknot,
+		.avatar .afro-hair, .avatar .braids, .avatar .beard, .avatar .mustache,
+		.avatar .earrings, .avatar .necklace, .avatar .hat, .avatar .makeup,
+		.avatar .dimples, .avatar .blush { opacity: 0; transition: opacity 250ms ease; }
+		.avatar-scene.has-glasses .glasses { opacity: 1; }
+		.avatar-scene.has-freckles .freckles { opacity: 1; }
+		.avatar-scene.has-curls .curl-accent { opacity: 1; }
+		.avatar-scene[data-hairstyle="long"] .long-hair,
+		.avatar-scene[data-hairstyle="curly"] .curl-accent,
+		.avatar-scene[data-hairstyle="coily"] .afro-hair,
+		.avatar-scene[data-hairstyle="braids"] .braids,
+		.avatar-scene[data-hairstyle="updo"] .topknot,
+		.avatar-scene[data-hairstyle="afro"] .afro-hair,
+		.avatar-scene[data-hairstyle="braids"] .braids,
+		.avatar-scene[data-hairstyle="short"] .sideburns,
+		.avatar-scene[data-hairstyle="shaved"] .sideburns,
+		.avatar-scene[data-hairstyle="headband"] .headband { opacity: 1; }
+		.avatar-scene[data-hairstyle="bald"] .hair,
+		.avatar-scene[data-hairstyle="bald"] .long-hair,
+		.avatar-scene[data-hairstyle="bald"] .sideburns,
+		.avatar-scene[data-hairstyle="bald"] .curl-accent { opacity: 0; }
+		.avatar-scene.has-beard .beard,
+		.avatar-scene.has-mustache .mustache,
+		.avatar-scene.has-earrings .earrings,
+		.avatar-scene.has-necklace .necklace,
+		.avatar-scene.has-hat .hat,
+		.avatar-scene.has-makeup .makeup,
+		.avatar-scene.has-dimples .dimples,
+		.avatar-scene.has-blush .blush { opacity: 1; }
+		.avatar-scene[data-outfit="pocket"] .clothing-pocket,
+		.avatar-scene[data-outfit="stripe"] .clothing-stripe,
+		.avatar-scene[data-outfit="scarf"] .clothing-scarf { opacity: 1; }
+		.avatar .clothing-pocket, .avatar .clothing-stripe, .avatar .clothing-scarf { opacity: 0; transition: opacity 250ms ease; }
+		.avatar .eye { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
+
+		@keyframes blink {
+			0%, 44%, 48%, 100% { transform: scaleY(1); }
+			46% { transform: scaleY(.08); }
+		}
+
+		.avatar .mouth { transition: d 250ms ease; }
+		.avatar-scene.is-smiling .mouth { d: path("M 127 172 Q 145 191 164 172"); }
+
+		.avatar-label {
+			position: absolute;
+			right: 9px;
+			bottom: 67px;
+			display: flex;
+			align-items: center;
+			gap: 7px;
+			padding: 8px 11px;
+			border: 1px solid #e0e7dc;
+			border-radius: 20px;
+			background: #fffefae8;
+			color: #536157;
+			font-size: 10px;
+			font-weight: 650;
+			box-shadow: 0 4px 14px #2038240a;
+			animation: label-in 300ms ease both;
+		}
+
+		@keyframes label-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+		.avatar-label-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--coral); }
+
+		.match-note {
+			display: flex;
+			align-items: center;
+			gap: 7px;
+			margin-top: -3px;
+			color: #78837a;
+			font-size: 11px;
+		}
+
+		.match-note strong { color: #48594c; font-weight: 700; }
+
+		.selection-footer {
+			width: 100%;
+			max-width: 580px;
+			min-height: 42px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 7px;
+			flex-wrap: wrap;
+			margin-top: 16px;
+		}
+
+		.selection-placeholder { color: #869087; font-size: 11px; }
+
+		.selection-tag {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			min-height: 28px;
+			padding: 3px 5px 3px 9px;
+			border: 1px solid #d9e2d4;
+			border-radius: 4px;
+			background: #ffffffb8;
+			color: #536157;
+			font-size: 10px;
+			animation: label-in 180ms ease both;
+		}
+
+		.selection-tag span { color: #849080; }
+		.selection-tag .selected-trait-name { color: #536157; }
+
+		.remove-trait {
+			width: 20px;
+			height: 20px;
+			display: grid;
+			place-items: center;
+			padding: 0;
+			border: 0;
+			border-radius: 50%;
+			background: transparent;
+			color: #758176;
+			cursor: pointer;
+			font-size: 15px;
+			line-height: 1;
+			transition: background 140ms ease, color 140ms ease;
+		}
+
+		.remove-trait:hover { background: #e5ecdf; color: var(--ink); }
+
+		.reset-button {
+			min-height: 35px;
+			display: inline-flex;
+			align-items: center;
+			gap: 7px;
+			margin-left: 4px;
+			padding: 0 10px;
+			border: 1px solid #d7e0d5;
+			border-radius: 5px;
+			background: transparent;
+			color: #58665c;
+			cursor: pointer;
+			font-size: 11px;
+			font-weight: 650;
+			transition: background 160ms ease, border-color 160ms ease;
+		}
+
+		.reset-button:hover { border-color: #aebca8; background: #ffffff9c; }
+		.reset-button svg { width: 13px; height: 13px; }
+
+		.progress-track {
+			width: min(100%, 270px);
+			height: 3px;
+			margin: 16px auto 0;
+			overflow: hidden;
+			border-radius: 3px;
+			background: #dce5d6;
+		}
+
+		.progress-fill {
+			width: 0%;
+			height: 100%;
+			border-radius: inherit;
+			background: #91b45c;
+			transition: width 600ms cubic-bezier(.2,.75,.25,1);
+		}
+
+		.footnote {
+			margin: 11px 0 0;
+			color: #97a097;
+			font-size: 9px;
+		}
+
+		.estimate-notes {
+			width: min(100%, 620px);
+			margin-top: 12px;
+			color: #758178;
+			font-size: 10px;
+			text-align: left;
+		}
+
+		.estimate-notes summary { width: fit-content; cursor: pointer; text-align: center; }
+		.estimate-notes summary:hover { color: #425a46; }
+		.estimate-copy { margin: 11px 0 0; padding: 13px 15px; border: 1px solid #dce5d8; border-radius: 6px; background: #ffffffb8; line-height: 1.6; }
+		.estimate-copy p { margin: 0 0 8px; }
+		.source-links { display: flex; flex-wrap: wrap; gap: 6px 14px; padding-top: 5px; }
+		.source-links a { color: #48684b; text-decoration-color: #a8baa0; text-underline-offset: 2px; }
+
+		.page-footer { padding-top: 26px; }
+
+		.ad-rail {
+			position: sticky;
+			top: 24px;
+			align-self: start;
+			min-width: 0;
+		}
+
+		.ad-rail-slot {
+			width: 100%;
+			height: min(600px, calc(100vh - 150px));
+			min-height: 360px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 12px;
+			padding: 12px;
+			border: 1px dashed #d0dbcd;
+			border-radius: 6px;
+			background: #edf1e966;
+			color: #89958a;
+			text-align: center;
+		}
+
+		.ad-rail-label { color: #748074; font-size: 8px; font-weight: 700; letter-spacing: 1px; }
+		.ad-rail-mark { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid #d7dfd3; border-radius: 50%; color: #889587; font-family: var(--serif); font-size: 14px; }
+		.ad-rail-copy { max-width: 104px; color: #738075; font-size: 10px; line-height: 1.45; }
+		.ad-rail-note { color: #a0a99f; font-size: 9px; line-height: 1.4; }
+
+		.ad-space {
+			width: min(100%, 920px);
+			min-height: 86px;
+			margin: 0 auto;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 12px;
+			border: 1px dashed #d0dbcd;
+			border-radius: 6px;
+			background: #edf1e9a6;
+			color: #89958a;
+			font-size: 10px;
+		}
+
+		.ad-space-label { padding: 4px 6px; border: 1px solid #d7dfd3; border-radius: 3px; color: #748074; font-size: 8px; font-weight: 700; letter-spacing: 1px; }
+		.ad-space-note { color: #9aa399; }
+		.footer-note { margin: 12px 0 0; color: #9aa399; font-size: 9px; text-align: center; }
+
+		@media (min-width: 1200px) {
+			.workspace { grid-template-columns: 320px minmax(0, 1fr) 160px; gap: clamp(28px, 2.4vw, 44px); }
+			.stage { min-height: 760px; }
+			.avatar-scene { height: 440px; }
+		}
+
+		@media (max-width: 1100px) {
+			.app-shell { padding: 0 24px 32px; }
+			.workspace { grid-template-columns: 258px minmax(0, 1fr); gap: 22px; }
+			.ad-rail { display: none; }
+			.stage { min-height: 660px; padding-right: 16px; padding-left: 16px; }
+			.avatar { width: 245px; }
+			.avatar { height: 315px; }
+			.avatar-scene { height: 340px; }
+			.avatar-halo { width: 260px; height: 260px; }
+			.population { font-size: clamp(42px, 5.8vw, 62px); }
+		}
+
+		@media (max-width: 680px) {
+			.app-shell { padding: 0 16px 24px; }
+			.topbar { height: 67px; }
+			.top-note { font-size: 10px; }
+			.workspace { display: flex; flex-direction: column; gap: 15px; padding-top: 22px; }
+			.controls { display: contents; }
+			.controls-intro { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+			.trait-search { order: 0; margin-top: 0; }
+			.control-title { margin: 5px 0 0; font-size: 25px; }
+			.control-subtitle { max-width: 180px; font-size: 11px; text-align: right; }
+			.eyebrow { font-size: 9px; }
+			.category-list { order: 1; display: flex; gap: 7px; margin-top: 1px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+			.category-list::-webkit-scrollbar { display: none; }
+			.category-button { width: auto; min-width: max-content; min-height: 36px; gap: 6px; padding: 0 9px; border-color: var(--line); background: #fbfcf8; }
+			.category-button[aria-pressed="true"] { border-color: #9eae92; background: #e6eedf; }
+			.category-icon { width: auto; font-size: 15px; }
+			.category-name { font-size: 10px; }
+			.category-status { min-width: 0; }
+			.trait-panel { order: 2; min-height: 0; margin-top: 0; padding: 13px 13px 10px; }
+			.stage { order: 3; min-height: 590px; padding: 22px 12px 20px; }
+			.population { margin-top: 14px; font-size: clamp(43px, 11vw, 62px); }
+			.population-caption { margin-top: 7px; font-size: 11px; }
+			.avatar-scene { width: 100%; height: 300px; margin-top: 0; }
+			.avatar { width: 225px; height: 300px; }
+			.avatar-halo { top: 23px; width: 230px; height: 230px; }
+			.avatar-shadow { bottom: 15px; }
+			.avatar-label { right: 0; bottom: 49px; padding: 7px 9px; font-size: 9px; }
+			.match-note { font-size: 10px; }
+			.selection-footer { margin-top: 10px; }
+			.footnote { margin-top: 8px; }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+		}
+	</style>
+</head>
+<body>
+	<div class="app-shell">
+		<header class="topbar">
+			<a class="brand" href="#" aria-label="Rarity home">
+				<span class="brand-mark">r</span>
+				<span>rarity</span>
+			</a>
+			<div class="top-note"><span class="live-dot"></span> A little perspective, for everyone</div>
+		</header>
+
+		<main class="workspace">
+			<aside class="controls" aria-label="Choose your traits">
+				<div class="controls-intro">
+					<div>
+						<p class="eyebrow">A world of 8 billion</p>
+						<h1 class="control-title">What makes<br>you, you?</h1>
+					</div>
+					<p class="control-subtitle">Pick a few things about yourself. See how many people share them.</p>
+				</div>
+				<div class="trait-search" id="trait-search-wrap">
+					<label class="search-field" for="trait-search-input">
+						<svg class="search-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.8" cy="8.8" r="5.7" stroke="currentColor" stroke-width="1.6"/><path d="m13.1 13.1 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+						<input class="search-input" id="trait-search-input" type="search" placeholder="Search traits and categories" autocomplete="off" aria-label="Search all traits and categories" aria-controls="search-results" aria-expanded="false">
+						<button class="search-clear" id="search-clear" type="button" aria-label="Clear search" title="Clear search" hidden>×</button>
+					</label>
+					<div class="search-results" id="search-results" role="listbox" aria-label="Trait search results" hidden></div>
+				</div>
+				<nav class="category-list" id="category-list" aria-label="Trait categories"></nav>
+				<section class="trait-panel" id="trait-panel" aria-live="polite"></section>
+			</aside>
+
+			<section class="stage" aria-label="Your rarity visualization">
+				<button class="sound-toggle" id="sound-toggle" type="button" aria-label="Turn sound off" aria-pressed="true" title="Turn sound off">
+					<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 8v4h3l4 3V5L6 8H3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path class="sound-wave" d="M13 7.2a4 4 0 0 1 0 5.6M15.3 5a7 7 0 0 1 0 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path class="sound-mute" d="m13 8 4 4m0-4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+				</button>
+				<div class="stage-kicker"><span class="sparkle">✳</span> YOUR VERY PARTICULAR KIND OF PERSON</div>
+				<p class="rarity-description" id="rarity-description" aria-live="polite" aria-atomic="true">You're like almost everyone else.</p>
+				<p class="population" id="population" aria-live="polite">8,000,000,000</p>
+				<p class="population-caption">estimated people share your combination</p>
+
+				<div class="avatar-scene" id="avatar-scene" data-vibe="soft">
+					<div class="avatar-halo"></div>
+					<span class="orbit-dot one"></span>
+					<span class="orbit-dot two"></span>
+					<span class="orbit-dot three"></span>
+					<div class="avatar-shadow"></div>
+					<svg class="avatar" viewBox="0 0 260 330" role="img" aria-label="A portrait that changes with your selected traits">
+						<defs>
+							<linearGradient id="shirt-shade" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffffff" stop-opacity=".2"/><stop offset="1" stop-color="#243b2f" stop-opacity=".14"/></linearGradient>
+							<linearGradient id="face-light" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#fff8e8" stop-opacity=".2"/><stop offset=".72" stop-color="#fff8e8" stop-opacity="0"/><stop offset="1" stop-color="#653a31" stop-opacity=".18"/></linearGradient>
+							<linearGradient id="hair-light" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffffff" stop-opacity=".15"/><stop offset="1" stop-color="#171b1a" stop-opacity=".2"/></linearGradient>
+							<filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="2.5"/><feOffset dy="2"/><feComponentTransfer><feFuncA type="linear" slope=".13"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+						</defs>
+						<ellipse cx="130" cy="306" rx="69" ry="9" fill="#536747" opacity=".12" />
+						<path class="shirt" d="M71 220 Q82 199 105 195 L130 205 L155 195 Q178 199 189 220 L205 292 Q167 310 130 310 Q93 310 55 292Z" filter="url(#soft-shadow)" />
+						<path d="M71 220 Q82 199 105 195 L130 205 L155 195 Q178 199 189 220 L205 292 Q167 310 130 310 Q93 310 55 292Z" fill="url(#shirt-shade)" />
+						<path d="M107 198 Q130 226 153 198 L147 186 L113 186Z" fill="#fff9ed" opacity=".98" />
+						<path d="M108 198 L130 216 L152 198" fill="none" stroke="#d4ccba" stroke-width="1.2" opacity=".8" />
+						<path class="clothing-pocket" d="M159 232 L180 232 L180 255 Q169 261 159 255Z" fill="none" stroke="#ffffff" stroke-width="2" opacity=".62" />
+						<path class="clothing-stripe" d="M67 259 Q130 273 196 259 M63 271 Q130 285 199 271" fill="none" stroke="#ffffff" stroke-width="2.5" opacity=".36" />
+						<path class="clothing-scarf" d="M114 197 Q130 205 146 197 L151 228 L137 220 L130 235 L123 220 L109 228Z" fill="#f2c95d" stroke="#fff6dc" stroke-width="1.5" />
+						<path class="skin" d="M111 177 L111 204 Q130 224 149 204 L149 177Z" />
+						<path d="M113 182 Q130 193 147 182 L147 201 Q130 217 113 201Z" fill="url(#face-light)" />
+						<path class="long-hair hair" d="M88 76 Q70 81 74 122 L66 193 Q70 207 88 212 L101 183 L97 119Z M172 76 Q190 81 186 122 L194 193 Q190 207 172 212 L159 183 L163 119Z" />
+						<path class="afro-hair hair" d="M80 116 Q61 113 61 91 Q54 76 70 64 Q68 48 86 44 Q92 27 111 31 Q123 17 139 27 Q158 23 165 40 Q184 40 188 58 Q204 69 195 86 Q202 104 185 117 L177 102 Q168 86 160 75 Q132 91 101 83 Q96 101 88 116Z" />
+						<path class="braids hair" d="M85 90 Q69 116 78 144 L70 162 Q84 173 75 190 M175 90 Q191 116 182 144 L190 162 Q176 173 185 190" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" />
+						<path class="braids" d="M85 90 Q69 116 78 144 L70 162 Q84 173 75 190 M175 90 Q191 116 182 144 L190 162 Q176 173 185 190" fill="none" stroke="url(#hair-light)" stroke-width="2" stroke-linecap="round" />
+						<path class="skin" d="M84 104 Q84 56 130 56 Q176 56 176 104 L176 145 Q176 179 130 194 Q84 179 84 145Z" />
+						<path d="M85 107 Q84 66 130 59 Q168 61 175 103 L175 146 Q169 177 130 190 Q91 177 85 146Z" fill="url(#face-light)" />
+						<ellipse class="skin" cx="82" cy="137" rx="8" ry="13" />
+						<ellipse class="skin" cx="178" cy="137" rx="8" ry="13" />
+						<path d="M80 137 Q85 130 88 138 M180 137 Q175 130 172 138" fill="none" stroke="#985e4d" stroke-width="1.4" stroke-linecap="round" opacity=".65" />
+						<path class="hair" d="M82 113 Q73 60 103 43 Q130 23 159 42 Q190 62 177 119 L168 102 Q161 94 155 76 Q133 91 101 83 Q99 100 88 116Z" />
+						<path d="M87 78 Q94 48 122 39 Q151 32 169 55" fill="none" stroke="url(#hair-light)" stroke-width="4" stroke-linecap="round" />
+						<path class="sideburns hair" d="M83 86 Q93 91 96 111 L92 137 Q83 133 82 120Z M177 86 Q167 91 164 111 L168 137 Q177 133 178 120Z" />
+						<path class="topknot hair" d="M110 45 Q104 19 128 15 Q151 17 148 43 Q133 37 110 45Z" />
+						<path class="headband" d="M87 87 Q130 67 173 87 L174 98 Q130 77 86 98Z" fill="#d6a950" stroke="#fff5d9" stroke-width="2" />
+						<path class="hat" d="M92 64 Q94 35 130 31 Q166 35 168 64 Q132 54 92 64Z" fill="#7c9e79" stroke="#e6efd9" stroke-width="2" />
+						<path class="hat" d="M84 65 Q128 53 176 66 Q155 77 97 73Z" fill="#64845f" />
+						<path class="curl-accent hair" d="M79 96 Q64 76 80 60 Q91 49 101 63 Q108 75 96 88 Q91 77 84 81Z" />
+						<path class="curl-accent hair" d="M170 82 Q181 67 194 78 Q204 91 190 104 Q190 91 178 93Z" />
+						<path d="M101 132 Q110 127 118 132" fill="none" stroke="#543e39" stroke-width="3" stroke-linecap="round" />
+						<path d="M142 132 Q150 127 159 132" fill="none" stroke="#543e39" stroke-width="3" stroke-linecap="round" />
+						<ellipse cx="110" cy="140" rx="7" ry="5.5" fill="#fffaf0" />
+						<ellipse cx="150" cy="140" rx="7" ry="5.5" fill="#fffaf0" />
+						<ellipse class="eye-white" cx="110" cy="140" rx="7" ry="5.5" fill="#fffaf0" />
+						<ellipse class="eye-white" cx="150" cy="140" rx="7" ry="5.5" fill="#fffaf0" />
+						<ellipse class="eye" cx="110" cy="140" rx="3.2" ry="4.1" fill="#302a27" />
+						<ellipse class="eye" cx="150" cy="140" rx="3.2" ry="4.1" fill="#302a27" />
+						<circle cx="111" cy="138" r="1.1" fill="#ffffff" opacity=".9" /><circle cx="151" cy="138" r="1.1" fill="#ffffff" opacity=".9" />
+						<path d="M130 143 Q126 155 130 157" fill="none" stroke="#9e6859" stroke-width="1.7" stroke-linecap="round" opacity=".75" />
+						<path class="makeup" d="M100 140 Q110 130 120 140 M140 140 Q150 130 160 140" fill="none" stroke="#513b3a" stroke-width="2" stroke-linecap="round" />
+						<ellipse class="blush" cx="99" cy="157" rx="11" ry="5" fill="#e17f73" opacity=".3" /><ellipse class="blush" cx="161" cy="157" rx="11" ry="5" fill="#e17f73" opacity=".3" />
+						<path class="beard" d="M91 151 Q93 181 130 192 Q167 181 169 151 Q160 165 151 161 Q141 178 130 175 Q117 179 108 161 Q100 166 91 151Z" fill="var(--hair, #392e2b)" opacity=".94" />
+						<path class="mustache" d="M116 164 Q122 159 130 163 Q138 159 144 164 Q141 173 130 170 Q119 173 116 164Z" fill="var(--hair, #392e2b)" />
+						<path class="mouth" d="M121 168 Q130 176 139 168" fill="none" stroke="#9e584d" stroke-width="2.5" stroke-linecap="round" />
+						<g class="dimples" fill="none" stroke="#9e584d" stroke-width="1.5" stroke-linecap="round"><path d="M111 170 Q114 173 117 171"/><path d="M143 171 Q146 173 149 170"/></g>
+						<g class="earrings" fill="none" stroke="#d2aa55" stroke-width="2"><circle cx="82" cy="153" r="3"/><path d="M82 156 Q77 165 82 170 Q87 165 82 156Z"/><circle cx="178" cy="153" r="3"/><path d="M178 156 Q173 165 178 170 Q183 165 178 156Z"/></g>
+						<path class="necklace" d="M108 199 Q130 220 152 199" fill="none" stroke="#d6b45f" stroke-width="2"/><path class="necklace" d="M127 215 L130 220 L133 215Z" fill="#d6b45f" />
+						<path d="M76 246 Q92 235 108 244 M152 244 Q168 235 184 246" fill="none" stroke="#ffffff" stroke-width="1.5" opacity=".55" />
+						<path d="M130 207 L130 291" fill="none" stroke="#ffffff" stroke-width="1" opacity=".16" />
+						<g class="freckles" fill="#8e5549">
+							<circle cx="99" cy="153" r="1.5" /><circle cx="105" cy="157" r="1.4" /><circle cx="111" cy="153" r="1.3" />
+							<circle cx="149" cy="153" r="1.3" /><circle cx="155" cy="157" r="1.4" /><circle cx="161" cy="153" r="1.5" />
+						</g>
+						<g class="glasses" fill="none" stroke="#34433b" stroke-width="3">
+							<rect x="94" y="128" width="29" height="22" rx="9" />
+							<rect x="137" y="128" width="29" height="22" rx="9" />
+							<path d="M123 136 Q130 132 137 136 M94 135 L87 132 M166 135 L173 132" />
+						</g>
+						<path d="M67 251 Q130 265 193 251" fill="none" stroke="#ffffff" stroke-width="2" opacity=".22" />
+						<circle cx="130" cy="267" r="4" fill="#f8efdc" opacity=".9" />
+					</svg>
+					<div class="avatar-label" id="avatar-label"><span class="avatar-label-dot"></span><span id="avatar-label-text">A one-of-a-kind you</span></div>
+				</div>
+
+				<div class="match-note"><strong id="trait-count">No traits yet</strong><span id="match-description">The whole world is in the running.</span></div>
+				<div class="selection-footer" id="selection-footer" aria-label="Selected traits"></div>
+				<div class="progress-track" aria-label="Rarity progress"><div class="progress-fill" id="progress-fill"></div></div>
+				<p class="footnote">A directional estimate, not an exact count.</p>
+				<details class="estimate-notes">
+					<summary>How the estimate works</summary>
+					<div class="estimate-copy">
+						<p>We start from an approximately 8 billion person baseline. Each trait has an estimated prevalence. The model starts with your rarest selected trait, then applies prototype overlap weights of 14% within a domain and 28% across domains. Those weights are explicit modeling assumptions, not measured joint correlations.</p>
+						<p>Country and regional shares are rounded from UN World Population Prospects 2024 estimates; the country list includes all 193 UN members plus Palestine and the Holy See. For major languages, Ethnologue total-speaker counts (native and second-language users) are scaled against 8 billion. Handedness uses a global meta-analysis. Eye color, hair color, sibling counts, identity, personality, and everyday preference rates are broad estimates because representative global data is limited and rates vary by place and generation.</p>
+						<div class="source-links">
+							<a href="https://population.un.org/wpp/" target="_blank" rel="noreferrer">UN World Population Prospects</a>
+							<a href="https://www.ethnologue.com/insights/ethnologue200/" target="_blank" rel="noreferrer">Ethnologue 200 language estimates</a>
+							<a href="https://doi.org/10.1037/bul0000229" target="_blank" rel="noreferrer">Global handedness meta-analysis</a>
+						</div>
+					</div>
+				</details>
+			</section>
+			<aside class="ad-rail" aria-label="Advertisement space reserved for future placement">
+				<div class="ad-rail-slot">
+					<span class="ad-rail-label">ADVERTISEMENT</span>
+					<span class="ad-rail-mark" aria-hidden="true">A</span>
+					<span class="ad-rail-copy">Reserved vertical placement</span>
+					<span class="ad-rail-note">No advertisement is currently shown</span>
+				</div>
+			</aside>
+		</main>
+		<footer class="page-footer">
+			<div class="ad-space" aria-label="Advertisement space reserved for future placement">
+				<span class="ad-space-label">AD SPACE</span>
+				<span>Reserved placement</span>
+				<span class="ad-space-note">No advertisement is currently shown</span>
+			</div>
+			<p class="footer-note">A small reminder that the world is full of people like you.</p>
+		</footer>
+	</div>
+
+	<script>
+		const BASE_POPULATION = 8000000000;
+
+		function makeTrait(name, share, look = {}) {
+			const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+			return { id, name, share, look };
+		}
+
+		function makeCategory(id, name, icon, mode, traits, metadata = {}) {
+			return { id, name, icon, mode, searchTerms: [], ...metadata, traits: traits.map(([label, share, look]) => makeTrait(label, share, look)) };
+		}
+
+		const categories = [
+			makeCategory("gender", "Gender", "◉", "single", [
+				["Male", 0.496, { hairstyle: "short", vibe: "bold" }], ["Female", 0.492, { hairstyle: "long", vibe: "bright" }], ["Non-binary", 0.007, { curls: true, vibe: "soft" }], ["Other", 0.005, { hairstyle: "headband", vibe: "bright" }]
+			]),
+			makeCategory("sexuality", "Sexuality", "♡", "single", [
+				["Straight", 0.84], ["Gay", 0.06], ["Lesbian", 0.03], ["Bisexual", 0.05], ["Pansexual", 0.01], ["Asexual", 0.01]
+			]),
+			makeCategory("continent", "Continent", "⌖", "single", [
+				["Europe", 0.09], ["Asia", 0.59], ["Africa", 0.18], ["North America", 0.075], ["South America", 0.055], ["Oceania", 0.005], ["Antarctica", 0.0000001]
+			]),
+			makeCategory("siblings", "Siblings", "⌘", "single", [
+				["0", 0.14], ["1", 0.27], ["2", 0.29], ["3", 0.15], ["4", 0.08], ["5+", 0.07]
+			]),
+			makeCategory("eyes", "Eye color", "◉", "single", [
+				["Brown", 0.55, { eye: "#493126" }], ["Blue", 0.08, { eye: "#719bad" }], ["Green", 0.02, { eye: "#71916c" }], ["Hazel", 0.05, { eye: "#a77b42" }], ["Gray", 0.01, { eye: "#89949a" }]
+			]),
+			makeCategory("hair", "Hair color", "〰", "single", [
+				["Black", 0.45, { hair: "#292729" }], ["Brown", 0.35, { hair: "#55392d" }], ["Blonde", 0.15, { hair: "#c39c56" }], ["Red", 0.02, { hair: "#ae583c" }], ["Gray", 0.03, { hair: "#aaa9a1" }]
+			]),
+			makeCategory("skin-tone", "Skin tone", "◐", "single", [
+				["Light", 0.16, { skin: "#f0c5a5" }], ["Medium light", 0.20, { skin: "#dfaa83" }], ["Medium", 0.24, { skin: "#bd795b" }], ["Medium deep", 0.22, { skin: "#955b43" }], ["Deep", 0.18, { skin: "#663c30" }]
+			]),
+			makeCategory("details", "Little details", "✳", "multiple", [
+				["Freckles", 0.16, { freckles: true, vibe: "bright" }], ["Dimples", 0.24, { smile: true, vibe: "bright" }], ["Glasses", 0.27, { glasses: true, vibe: "soft" }], ["Left-handed", 0.106, { vibe: "bold" }], ["Curly hair", 0.11, { curls: true, vibe: "bold" }], ["Wears a watch", 0.31, { shirt: "#82b9c0" }]
+			]),
+			makeCategory("rhythm", "Daily rhythm", "☼", "multiple", [
+				["Morning person", 0.32, { vibe: "bright" }], ["Night owl", 0.28, { vibe: "bold" }], ["Early riser", 0.21, { shirt: "#d5a949" }], ["Needs a slow start", 0.37, { vibe: "soft" }]
+			]),
+			makeCategory("social", "Social energy", "◌", "multiple", [
+				["Introvert", 0.42, { vibe: "soft" }], ["Extrovert", 0.31, { vibe: "bright" }], ["Somewhere in between", 0.27, { vibe: "bold" }], ["Loves a small group", 0.36, { shirt: "#87aa6d" }]
+			]),
+			makeCategory("interests", "Interests", "☆", "multiple", [
+				["Loves sports", 0.28, { shirt: "#87aa6d" }], ["Loves music", 0.44, { shirt: "#df8067" }], ["Loves gaming", 0.26, { shirt: "#7daeb8" }], ["Loves reading", 0.35, { vibe: "soft" }], ["Loves cooking", 0.31, { shirt: "#d5a949" }], ["Loves dancing", 0.18, { vibe: "bright" }], ["Loves films", 0.39], ["Loves art", 0.22], ["Loves puzzles", 0.17], ["Loves gardening", 0.19], ["Loves photography", 0.21], ["Loves the outdoors", 0.33]
+			]),
+			makeCategory("lifestyle", "Lifestyle", "♧", "multiple", [
+				["Vegetarian", 0.12, { shirt: "#87aa6d" }], ["Vegan", 0.04, { shirt: "#9dbb72" }], ["Has a pet", 0.48, { smile: true }], ["Has a dog", 0.27, { smile: true, vibe: "bright" }], ["Has a cat", 0.23, { smile: true, vibe: "soft" }], ["Enjoys hiking", 0.24, { shirt: "#87aa6d" }], ["Enjoys baking", 0.19, { shirt: "#d5a949" }], ["Recycles often", 0.38], ["Prefers the city", 0.41], ["Prefers the countryside", 0.22]
+			]),
+			makeCategory("languages", "Languages", "文", "multiple", [
+				["English", 0.188], ["German", 0.017], ["Spanish", 0.070], ["French", 0.042], ["Italian", 0.012], ["Portuguese", 0.034], ["Arabic", 0.042], ["Mandarin", 0.150], ["Japanese", 0.020], ["Korean", 0.012], ["Hindi", 0.076], ["Russian", 0.026], ["Turkish", 0.010], ["Dutch", 0.005], ["Polish", 0.006], ["Swedish", 0.002], ["Greek", 0.002], ["Urdu", 0.031], ["Swahili", 0.015], ["Tagalog", 0.018], ["Vietnamese", 0.012], ["Indonesian", 0.032], ["Hebrew", 0.002], ["Bengali", 0.034], ["Thai", 0.012], ["Persian", 0.015], ["Punjabi", 0.025], ["Tamil", 0.015], ["Javanese", 0.012], ["Other language", 0.08]
+			]),
+			makeCategory("season", "Favorite season", "❋", "single", [
+				["Spring", 0.24, { vibe: "bright" }], ["Summer", 0.31, { shirt: "#e3b859", vibe: "bright" }], ["Autumn", 0.25, { shirt: "#df8067", vibe: "bold" }], ["Winter", 0.20, { shirt: "#82b9c0", vibe: "soft" }]
+			]),
+			makeCategory("creative", "Creative side", "✎", "multiple", [
+				["Draws or paints", 0.16], ["Plays an instrument", 0.14, { shirt: "#df8067" }], ["Writes for fun", 0.18], ["Makes things by hand", 0.23], ["Sings", 0.21], ["Designs things", 0.12], ["Enjoys photography", 0.21], ["Has a creative hobby", 0.34]
+			]),
+			makeCategory("travel", "Travel style", "⌁", "multiple", [
+				["Plans every detail", 0.29, { vibe: "soft" }], ["Wanders without a plan", 0.24, { vibe: "bright" }], ["Loves road trips", 0.32, { shirt: "#87aa6d" }], ["Collects souvenirs", 0.27], ["Travels for food", 0.31, { shirt: "#d5a949" }], ["Prefers staying close", 0.35, { vibe: "soft" }]
+			]),
+			makeCategory("comfort-food", "Comfort food", "♡", "single", [
+				["Something sweet", 0.29, { vibe: "bright" }], ["Something spicy", 0.22, { vibe: "bold" }], ["A bowl of noodles", 0.24, { shirt: "#d5a949" }], ["Freshly baked bread", 0.13], ["A familiar favorite", 0.12, { vibe: "soft" }]
+			]),
+			makeCategory("small-joys", "Small joys", "✧", "multiple", [
+				["The first sip", 0.22, { smile: true, vibe: "bright" }], ["Fresh sheets", 0.18, { smile: true, vibe: "soft" }], ["A perfect song", 0.34, { smile: true, vibe: "bold" }], ["Golden hour", 0.26, { smile: true, vibe: "bright" }], ["A message from a friend", 0.38, { smile: true }], ["Finishing a good book", 0.19, { smile: true, vibe: "soft" }]
+			])
+		];
+
+		categories.push(
+			makeCategory("appearance", "Appearance", "✧", "multiple", [
+				["Birthmark", 0.10], ["Beauty mark", 0.08], ["Tattoos", 0.20], ["Piercings", 0.16], ["Wears makeup", 0.34, { makeup: true }], ["Natural nails", 0.42], ["Distinctive smile", 0.24, { smile: true }], ["Dresses for comfort", 0.48], ["Loves bright colors", 0.29], ["Keeps a minimal style", 0.25], ["Signature accessory", 0.18], ["Changes their look often", 0.15]
+			], { searchTerms: ["style", "looks", "presentation"], estimateGroup: "appearance" }),
+			makeCategory("hair-style", "Hair style", "〰", "single", [
+				["Straight", 0.40], ["Wavy", 0.28], ["Curly", 0.18, { hairstyle: "curly", curls: true }], ["Coily", 0.10, { hairstyle: "coily" }], ["Braids", 0.12, { hairstyle: "braids" }], ["Short crop", 0.24, { hairstyle: "short" }], ["Long hair", 0.35, { hairstyle: "long" }], ["Bun or updo", 0.15, { hairstyle: "updo" }], ["Shaved", 0.04, { hairstyle: "shaved" }], ["Bald", 0.02, { hairstyle: "bald" }], ["Headband", 0.18, { hairstyle: "headband" }]
+			], { searchTerms: ["haircut", "hairstyle", "hair texture"], estimateGroup: "appearance" }),
+			makeCategory("eye-details", "Eye details", "◉", "multiple", [
+				["Wears contact lenses", 0.09], ["Long eyelashes", 0.25], ["Arched eyebrows", 0.30], ["Straight eyebrows", 0.28], ["Uses eye makeup", 0.25], ["Has a distinctive gaze", 0.18], ["Heterochromia", 0.001], ["Often wears sunglasses", 0.31]
+			], { searchTerms: ["eyes", "eyebrows", "lashes"], estimateGroup: "appearance" }),
+			makeCategory("face", "Face features", "◡", "multiple", [
+				["Beard", 0.21, { beard: true }], ["Mustache", 0.10, { mustache: true }], ["Clean-shaven", 0.39], ["Soft jawline", 0.34], ["Defined jawline", 0.24], ["Round face", 0.31], ["Oval face", 0.35], ["Dimpled chin", 0.08], ["Rosy cheeks", 0.26, { blush: true }], ["Prominent cheekbones", 0.18]
+			], { searchTerms: ["facial features", "beard", "mustache"], estimateGroup: "appearance" }),
+			makeCategory("body", "Body", "⌁", "single", [
+				["Under 5 ft 4 in", 0.16, { bodyScale: 0.93 }], ["5 ft 4 to 5 ft 8 in", 0.28, { bodyScale: 0.98 }], ["5 ft 9 to 6 ft", 0.30, { bodyScale: 1.03 }], ["Over 6 ft", 0.12, { bodyScale: 1.08 }]
+			], { searchTerms: ["height", "physical traits"], estimateGroup: "appearance" }),
+			makeCategory("movement", "Movement", "↗", "multiple", [
+				["Moves at an easy pace", 0.40], ["Always on the move", 0.29, { vibe: "bright" }], ["Loves to stretch", 0.24], ["Good posture", 0.31], ["Expressive with their hands", 0.33, { vibe: "bold" }], ["Enjoys long walks", 0.38], ["Dances while waiting", 0.16], ["Cycles to get around", 0.18], ["Takes the stairs", 0.27]
+			], { searchTerms: ["physical activity", "walking", "exercise"], estimateGroup: "hobbies" }),
+			makeCategory("family", "Family", "⌂", "multiple", [
+				["Close with family", 0.48], ["Chosen family is important", 0.28], ["Big family gatherings", 0.32], ["Small family circle", 0.26], ["Lives near family", 0.34], ["Lives far from family", 0.25], ["Has children", 0.35], ["Is an only child", 0.14], ["Has a big sibling group", 0.18], ["Family traditions matter", 0.41], ["Often hosts family", 0.17]
+			], { searchTerms: ["relatives", "household"], estimateGroup: "family" }),
+			makeCategory("birth-order", "Birth order", "⇅", "single", [
+				["Only child", 0.14], ["Oldest", 0.28], ["Middle child", 0.26], ["Youngest", 0.28], ["Twin or multiple", 0.025], ["Birth order feels complicated", 0.015]
+			], { searchTerms: ["siblings", "family position"], estimateGroup: "family" }),
+			makeCategory("personality", "Personality", "◌", "multiple", [
+				["Curious", 0.56], ["Patient", 0.42], ["Spontaneous", 0.38], ["A careful planner", 0.39], ["Optimistic", 0.44], ["Practical", 0.47], ["Daydreamer", 0.33], ["Competitive", 0.26], ["Empathetic", 0.52], ["Independent", 0.46], ["Sentimental", 0.41], ["A little superstitious", 0.22]
+			], { searchTerms: ["character", "temperament"], estimateGroup: "personality" }),
+			makeCategory("sports", "Sports", "◉", "multiple", [
+				["Plays soccer", 0.20], ["Plays basketball", 0.12], ["Plays tennis", 0.07], ["Runs for fun", 0.18], ["Cycles regularly", 0.16], ["Swims for exercise", 0.20], ["Follows a local team", 0.34], ["Watches major tournaments", 0.28], ["Practices yoga", 0.19], ["Enjoys martial arts", 0.08], ["Plays volleyball", 0.09], ["Enjoys a weekend match", 0.25]
+			], { searchTerms: ["exercise", "athletics"], estimateGroup: "hobbies" }),
+			makeCategory("music", "Music", "♫", "multiple", [
+				["Plays piano", 0.08], ["Plays guitar", 0.12], ["Plays drums", 0.05], ["Sings in a choir", 0.07], ["Makes playlists", 0.55], ["Listens to music daily", 0.68], ["Enjoys live concerts", 0.31], ["Collects records", 0.08], ["Writes songs", 0.06], ["Learns songs by ear", 0.14], ["Prefers instrumental music", 0.22], ["Always has a song stuck", 0.41]
+			], { searchTerms: ["instrument", "concert", "songs"], estimateGroup: "hobbies" }),
+			makeCategory("gaming", "Gaming", "▣", "multiple", [
+				["Plays cozy games", 0.18], ["Plays strategy games", 0.19], ["Plays puzzle games", 0.24], ["Enjoys multiplayer games", 0.29], ["Prefers single-player games", 0.32], ["Plays games on mobile", 0.48], ["Plays on console", 0.28], ["Plays on PC", 0.24], ["Watches esports", 0.12], ["Enjoys tabletop games", 0.21], ["Collects game soundtracks", 0.06]
+			], { searchTerms: ["video games", "board games", "esports"], estimateGroup: "hobbies" }),
+			makeCategory("reading", "Reading", "▤", "multiple", [
+				["Reads fiction", 0.39], ["Reads nonfiction", 0.28], ["Reads fantasy", 0.22], ["Reads mysteries", 0.19], ["Reads graphic novels", 0.12], ["Reads before bed", 0.31], ["Listens to audiobooks", 0.25], ["Visits the library", 0.30], ["Re-reads favorites", 0.28], ["Reads the news", 0.45], ["Keeps a to-read list", 0.26]
+			], { searchTerms: ["books", "library", "audiobooks"], estimateGroup: "hobbies" }),
+			makeCategory("food", "Food", "♨", "multiple", [
+				["Enjoys spicy food", 0.44], ["Has a sweet tooth", 0.46], ["Loves trying new dishes", 0.39], ["Prefers familiar meals", 0.35], ["Enjoys cooking at home", 0.48], ["Orders the same favorite", 0.32], ["Drinks tea most days", 0.38], ["Drinks coffee most days", 0.31], ["Enjoys street food", 0.41], ["Likes to bake", 0.24], ["Savors a long meal", 0.37], ["Always saves room for dessert", 0.29]
+			], { searchTerms: ["eating", "cooking", "drink"], estimateGroup: "lifestyle" }),
+			makeCategory("education", "Education", "⌑", "single", [
+				["Still in school", 0.20], ["Completed secondary school", 0.29], ["Trade or vocational training", 0.12], ["Some university", 0.12], ["Bachelor's degree", 0.16], ["Graduate degree", 0.07], ["Self-taught", 0.22], ["Learning something new now", 0.31], ["Apprenticeship", 0.06], ["Prefer hands-on learning", 0.36]
+			], { searchTerms: ["study", "school", "learning"], estimateGroup: "education" }),
+			makeCategory("technology", "Technology", "⌘", "multiple", [
+				["Early adopter", 0.16], ["Keeps notifications off", 0.34], ["Uses a paper calendar", 0.27], ["Uses a password manager", 0.29], ["Builds with code", 0.06], ["Enjoys new gadgets", 0.24], ["Prefers a laptop", 0.51], ["Prefers a tablet", 0.17], ["Takes lots of photos", 0.42], ["Uses voice messages", 0.31], ["Has a favorite keyboard shortcut", 0.12], ["Unplugs on weekends", 0.23]
+			], { searchTerms: ["tech", "gadgets", "devices", "digital"], estimateGroup: "technology" }),
+			makeCategory("sleep", "Sleep habits", "☾", "multiple", [
+				["Sleeps with a fan on", 0.31], ["Needs a dark room", 0.52], ["Uses an alarm", 0.68], ["Hits snooze", 0.46], ["Falls asleep quickly", 0.28], ["Needs a wind-down routine", 0.37], ["Sleeps with a pet nearby", 0.19], ["Remembers their dreams", 0.36], ["Takes a daytime nap", 0.24], ["Keeps an irregular schedule", 0.31], ["Reads before sleeping", 0.28]
+			], { searchTerms: ["sleep", "nap", "bedtime"], estimateGroup: "routines" }),
+			makeCategory("preferences", "Personality preferences", "◇", "multiple", [
+				["Prefers a few close friends", 0.42], ["Likes meeting new people", 0.37], ["Thinks before speaking", 0.48], ["Talks it out", 0.39], ["Likes a clear plan", 0.51], ["Enjoys a little uncertainty", 0.32], ["Prefers familiar places", 0.46], ["Loves discovering new places", 0.36], ["Needs quiet to recharge", 0.52], ["Feels energized by a crowd", 0.25], ["Decides with intuition", 0.40]
+			], { searchTerms: ["social", "introvert", "extrovert", "preferences"], estimateGroup: "personality" }),
+			makeCategory("weekend", "Weekend habits", "☼", "multiple", [
+				["Sleeps in", 0.47], ["Gets outside early", 0.28], ["Catches up on chores", 0.56], ["Makes a big breakfast", 0.31], ["Sees friends", 0.42], ["Calls family", 0.34], ["Plans the week ahead", 0.38], ["Leaves the calendar open", 0.33], ["Visits a market", 0.21], ["Watches a comfort show", 0.44], ["Takes a day trip", 0.29], ["Has a slow Sunday", 0.51]
+			], { searchTerms: ["weekend", "saturday", "sunday"], estimateGroup: "routines" }),
+			makeCategory("social-habits", "Social habits", "◍", "multiple", [
+				["Replies right away", 0.34], ["Sends voice notes", 0.29], ["Remembers birthdays", 0.46], ["Makes the first introduction", 0.27], ["Prefers one-on-one chats", 0.43], ["Organizes group plans", 0.25], ["Checks in on friends", 0.52], ["Keeps in touch across distance", 0.48], ["Enjoys hosting", 0.31], ["Likes being the plus-one", 0.22], ["Shares photos with friends", 0.39]
+			], { searchTerms: ["friends", "communication", "social"], estimateGroup: "social" }),
+			makeCategory("everyday", "Everyday characteristics", "✧", "multiple", [
+				["Carries a water bottle", 0.49], ["Always has a tote bag", 0.28], ["Keeps a list", 0.58], ["Loses track of time", 0.42], ["Arrives a little early", 0.35], ["Knows the way by landmarks", 0.44], ["Keeps small souvenirs", 0.37], ["Has a lucky item", 0.23], ["Reads every sign", 0.26], ["Remembers tiny details", 0.41], ["Takes the scenic route", 0.34], ["Saves useful boxes", 0.32]
+			], { searchTerms: ["daily life", "everyday", "habits"], estimateGroup: "routines" }),
+			makeCategory("accessories", "Accessories", "◇", "multiple", [
+				["Wears earrings", 0.31, { earrings: true }], ["Wears a necklace", 0.27, { necklace: true }], ["Wears a hat", 0.23, { hat: true }], ["Wears a scarf", 0.25], ["Wears a ring", 0.32], ["Carries a backpack", 0.39], ["Wears colorful socks", 0.28], ["Has a signature bag", 0.18], ["Wears a favorite watch", 0.26, { shirt: "#82b9c0" }], ["Loves a good pair of glasses", 0.19, { glasses: true }]
+			], { searchTerms: ["jewelry", "clothing", "accessory"], estimateGroup: "appearance" }),
+			makeCategory("clothing", "Clothing style", "▤", "multiple", [
+				["Soft knits", 0.27, { shirt: "#8db9b0" }], ["Blue denim", 0.38, { shirt: "#6f9eb2", outfit: "pocket" }], ["Earth-tone layers", 0.31, { shirt: "#82966d", outfit: "scarf" }], ["Bright patterns", 0.24, { shirt: "#e28b6d", outfit: "stripe" }], ["Clean neutrals", 0.35, { shirt: "#d3c8b3" }], ["Sporty basics", 0.29, { shirt: "#779e80", outfit: "stripe" }], ["Vintage finds", 0.19, { shirt: "#bd856e" }], ["A polished look", 0.26, { shirt: "#71949a" }], ["Comfort first", 0.48, { shirt: "#b9c28f" }], ["A signature color", 0.18, { shirt: "#d7a84f" }]
+			], { searchTerms: ["outfit", "wardrobe", "clothes"], estimateGroup: "appearance" })
+		);
+
+		const countryPopulationEstimates = [
+			["Afghanistan", 42.6], ["Albania", 2.8], ["Algeria", 46.8], ["Andorra", 0.08], ["Angola", 37.9], ["Antigua and Barbuda", 0.094], ["Argentina", 45.7], ["Armenia", 3.0], ["Australia", 27.2], ["Austria", 9.2], ["Azerbaijan", 10.2],
+			["Bahamas", 0.41], ["Bahrain", 1.59], ["Bangladesh", 173.6], ["Barbados", 0.28], ["Belarus", 9.1], ["Belgium", 11.8], ["Belize", 0.42], ["Benin", 14.5], ["Bhutan", 0.79], ["Bolivia", 12.5], ["Bosnia and Herzegovina", 3.2], ["Botswana", 2.5], ["Brazil", 212.0], ["Brunei", 0.46], ["Bulgaria", 6.4], ["Burkina Faso", 23.5], ["Burundi", 14.0],
+			["Cabo Verde", 0.52], ["Cambodia", 17.6], ["Cameroon", 29.1], ["Canada", 40.1], ["Central African Republic", 5.3], ["Chad", 19.3], ["Chile", 19.8], ["China", 1408.0], ["Colombia", 52.9], ["Comoros", 0.87], ["Republic of the Congo", 6.3], ["Costa Rica", 5.1], ["Côte d’Ivoire", 31.9], ["Croatia", 3.9], ["Cuba", 11.0], ["Cyprus", 1.35], ["Czechia", 10.9],
+			["Democratic Republic of the Congo", 109.3], ["Denmark", 6.0], ["Djibouti", 1.17], ["Dominica", 0.066], ["Dominican Republic", 11.4], ["Ecuador", 18.1], ["Egypt", 116.5], ["El Salvador", 6.3], ["Equatorial Guinea", 1.9], ["Eritrea", 3.6], ["Estonia", 1.37], ["Eswatini", 1.24], ["Ethiopia", 132.1],
+			["Fiji", 0.93], ["Finland", 5.6], ["France", 68.5], ["Gabon", 2.5], ["Gambia", 2.8], ["Georgia", 3.7], ["Germany", 84.5], ["Ghana", 34.4], ["Greece", 10.0], ["Grenada", 0.117], ["Guatemala", 18.4], ["Guinea", 14.8], ["Guinea-Bissau", 2.2], ["Guyana", 0.83],
+			["Haiti", 11.8], ["Holy See (Vatican City)", 0.0005], ["Honduras", 10.8], ["Hungary", 9.6], ["Iceland", 0.39], ["India", 1450.0], ["Indonesia", 283.5], ["Iran", 91.6], ["Iraq", 46.0], ["Ireland", 5.3], ["Israel", 9.9], ["Italy", 59.0], ["Jamaica", 2.8], ["Japan", 123.8], ["Jordan", 11.5],
+			["Kazakhstan", 20.6], ["Kenya", 56.4], ["Kiribati", 0.135], ["Kuwait", 4.9], ["Kyrgyzstan", 7.2], ["Laos", 7.8], ["Latvia", 1.9], ["Lebanon", 5.8], ["Lesotho", 2.3], ["Liberia", 5.6], ["Libya", 7.4], ["Liechtenstein", 0.04], ["Lithuania", 2.9], ["Luxembourg", 0.67],
+			["Madagascar", 32.0], ["Malawi", 21.7], ["Malaysia", 35.6], ["Maldives", 0.53], ["Mali", 24.5], ["Malta", 0.54], ["Marshall Islands", 0.042], ["Mauritania", 5.2], ["Mauritius", 1.27], ["Mexico", 130.9], ["Micronesia", 0.113], ["Moldova", 3.0], ["Monaco", 0.039], ["Mongolia", 3.5], ["Montenegro", 0.62], ["Morocco", 38.1], ["Mozambique", 34.6], ["Myanmar", 54.5],
+			["Namibia", 3.0], ["Nauru", 0.012], ["Nepal", 29.6], ["Netherlands", 18.2], ["New Zealand", 5.2], ["Nicaragua", 6.9], ["Niger", 27.2], ["Nigeria", 232.7], ["North Korea", 26.5], ["North Macedonia", 1.8], ["Norway", 5.6], ["Oman", 5.3], ["Pakistan", 255.2], ["Palau", 0.018], ["Palestine", 5.5], ["Panama", 4.5], ["Papua New Guinea", 10.6], ["Paraguay", 6.9], ["Peru", 34.2], ["Philippines", 115.8], ["Poland", 38.5], ["Portugal", 10.4],
+			["Qatar", 3.0], ["Romania", 19.0], ["Russia", 144.0], ["Rwanda", 14.3], ["Saint Kitts and Nevis", 0.047], ["Saint Lucia", 0.18], ["Saint Vincent and the Grenadines", 0.10], ["Samoa", 0.22], ["San Marino", 0.034], ["Sao Tome and Principe", 0.24], ["Saudi Arabia", 34.6], ["Senegal", 18.5], ["Serbia", 6.7], ["Seychelles", 0.13], ["Sierra Leone", 8.6], ["Singapore", 5.9], ["Slovakia", 5.4], ["Slovenia", 2.1], ["Solomon Islands", 0.84], ["Somalia", 19.0], ["South Africa", 64.0], ["South Korea", 51.7], ["South Sudan", 11.9], ["Spain", 48.6], ["Sri Lanka", 22.0], ["Sudan", 50.4], ["Suriname", 0.63], ["Sweden", 10.6], ["Switzerland", 8.9], ["Syria", 24.7],
+			["Tajikistan", 10.6], ["Tanzania", 68.6], ["Thailand", 71.7], ["Timor-Leste", 1.4], ["Togo", 9.5], ["Tonga", 0.104], ["Trinidad and Tobago", 1.5], ["Tunisia", 12.3], ["Turkey", 87.5], ["Turkmenistan", 7.5], ["Tuvalu", 0.009], ["Uganda", 50.0], ["Ukraine", 37.9], ["United Arab Emirates", 11.0], ["United Kingdom", 69.5], ["United States", 340.0], ["Uruguay", 3.4], ["Uzbekistan", 36.4], ["Vanuatu", 0.33], ["Venezuela", 28.4], ["Vietnam", 101.0], ["Yemen", 40.6], ["Zambia", 21.3], ["Zimbabwe", 16.6]
+		];
+		const countryCategory = makeCategory("country", "Country", "⌖", "single",
+			countryPopulationEstimates.map(([name, populationMillions]) => [name, populationMillions / 8000]),
+			{ searchTerms: ["nation", "country of residence", "where you live"], estimateGroup: "place", confidence: "rounded 2024 population estimate" }
+		);
+		categories.splice(categories.findIndex(category => category.id === "continent") + 1, 0, countryCategory);
+
+		const estimateGroups = {
+			gender: "identity", sexuality: "identity", continent: "place", country: "place", languages: "place",
+			siblings: "family", family: "family", "birth-order": "family",
+			eyes: "appearance", hair: "appearance", "skin-tone": "appearance", details: "appearance",
+			rhythm: "routines", weekend: "routines", everyday: "routines", sleep: "routines",
+			social: "personality", personality: "personality", preferences: "personality", "social-habits": "social",
+			interests: "hobbies", sports: "hobbies", music: "hobbies", gaming: "hobbies", reading: "hobbies", creative: "hobbies",
+			lifestyle: "lifestyle", food: "lifestyle", "comfort-food": "lifestyle", travel: "place",
+			technology: "technology", education: "education", appearance: "appearance", clothing: "appearance", "hair-style": "appearance",
+			"eye-details": "appearance", face: "appearance", body: "appearance", movement: "hobbies", accessories: "appearance",
+			season: "preferences", "small-joys": "preferences"
+		};
+		categories.forEach(category => {
+			category.estimateGroup = estimateGroups[category.id] || category.id;
+			category.traits.forEach(trait => { trait.estimateGroup = category.estimateGroup; });
+		});
+		categories.find(category => category.id === "languages").traits.forEach(trait => { trait.confidence = "language estimate"; });
+		categories.find(category => category.id === "continent").traits.forEach(trait => { trait.confidence = "regional estimate"; });
+		const leftHandedTrait = categories.find(category => category.id === "details").traits.find(trait => trait.id === "left-handed");
+		leftHandedTrait.confidence = "10.6% global meta-analysis";
+		leftHandedTrait.source = "https://doi.org/10.1037/bul0000229";
+		leftHandedTrait.estimateGroup = "handedness";
+		const sourceBackedLanguageIds = new Set(["english", "mandarin", "hindi", "spanish", "arabic", "french", "bengali", "portuguese", "indonesian", "urdu", "russian"]);
+		categories.find(category => category.id === "languages").traits.forEach(trait => {
+			trait.confidence = sourceBackedLanguageIds.has(trait.id) ? "published total-speaker estimate" : "broad language estimate";
+			trait.source = sourceBackedLanguageIds.has(trait.id) ? "https://www.ethnologue.com/insights/ethnologue200/" : null;
+		});
+		countryCategory.traits.forEach(trait => {
+			trait.confidence = "rounded 2024 population estimate";
+			trait.source = "https://population.un.org/wpp/";
+		});
+
+		const selected = new Map();
+		let activeCategory = categories[0].id;
+		let displayedPopulation = BASE_POPULATION;
+		let animationFrame = 0;
+		const populationNode = document.getElementById("population");
+		const categoryList = document.getElementById("category-list");
+		const traitPanel = document.getElementById("trait-panel");
+		const selectionFooter = document.getElementById("selection-footer");
+		const avatarScene = document.getElementById("avatar-scene");
+		const searchInput = document.getElementById("trait-search-input");
+		const searchResults = document.getElementById("search-results");
+		const searchClear = document.getElementById("search-clear");
+		const searchWrap = document.getElementById("trait-search-wrap");
+		const rarityDescription = document.getElementById("rarity-description");
+		const soundToggle = document.getElementById("sound-toggle");
+		let soundEnabled = true;
+		let countAudioContext;
+
+		function rarityMessage(population) {
+			if (population >= 7000000000) return "You're like almost everyone else.";
+			if (population >= 3000000000) return "You're pretty common.";
+			if (population >= 500000000) return "You're getting less common.";
+			if (population >= 50000000) return "You're pretty unique.";
+			if (population >= 5000000) return "You're very unique.";
+			if (population >= 500000) return "You're extremely rare.";
+			if (population >= 50000) return "You're one in a hundred thousand.";
+			if (population >= 5000) return "You're seriously one of a kind.";
+			return "Almost nobody is like you.";
+		}
+
+		function updateRarityDescription(population) {
+			const message = rarityMessage(population);
+			if (rarityDescription.textContent !== message) rarityDescription.textContent = message;
+		}
+
+		function getSelectedTraits() {
+			return categories.flatMap(category => [...(selected.get(category.id) || [])]
+				.map(traitId => ({ category, trait: category.traits.find(item => item.id === traitId) }))
+				.filter(selection => selection.trait));
+		}
+
+		function formatPopulation(value) {
+			return Math.max(1, Math.round(value)).toLocaleString("en-US");
+		}
+
+		function playCountCue(direction) {
+			if (!soundEnabled) return;
+			const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+			if (!AudioContextClass) return;
+
+			try {
+				countAudioContext ||= new AudioContextClass();
+				if (countAudioContext.state === "suspended") countAudioContext.resume();
+				const now = countAudioContext.currentTime;
+				const falling = direction === "drop";
+				const clickDuration = 0.02;
+				const bufferLength = Math.ceil(countAudioContext.sampleRate * clickDuration);
+				const clickBuffer = countAudioContext.createBuffer(1, bufferLength, countAudioContext.sampleRate);
+				const samples = clickBuffer.getChannelData(0);
+				for (let index = 0; index < samples.length; index++) {
+					const decay = 1 - index / samples.length;
+					samples[index] = (Math.random() * 2 - 1) * decay * decay;
+				}
+
+				for (let index = 0; index < 4; index++) {
+					const clickAt = now + index * 0.052;
+					const filter = countAudioContext.createBiquadFilter();
+					const envelope = countAudioContext.createGain();
+					const source = countAudioContext.createBufferSource();
+					const step = index / 3;
+					filter.type = "highpass";
+					filter.frequency.setValueAtTime(falling ? 1900 - step * 700 : 1200 + step * 700, clickAt);
+					envelope.gain.setValueAtTime(0.04, clickAt);
+					envelope.gain.exponentialRampToValueAtTime(0.0001, clickAt + clickDuration);
+					source.buffer = clickBuffer;
+					source.connect(filter);
+					filter.connect(envelope);
+					envelope.connect(countAudioContext.destination);
+					source.start(clickAt);
+					source.stop(clickAt + clickDuration);
+				}
+			} catch {
+				countAudioContext = undefined;
+			}
+		}
+
+		function estimatePopulation() {
+			const selectedTraits = getSelectedTraits();
+			if (!selectedTraits.length) return BASE_POPULATION;
+
+			const groups = new Map();
+			for (const selection of selectedTraits) {
+				const groupId = selection.trait.estimateGroup;
+				if (!groups.has(groupId)) groups.set(groupId, []);
+				groups.get(groupId).push(selection.trait.share);
+			}
+
+			const groupEstimates = [...groups.values()].map(shares => {
+				const sortedShares = [...shares].sort((left, right) => left - right);
+				return sortedShares.slice(1).reduce(
+					(estimate, share) => estimate * (1 - 0.14 * (1 - share)),
+					sortedShares[0]
+				);
+			}).sort((left, right) => left - right);
+
+			const combinedShare = groupEstimates.slice(1).reduce(
+				(estimate, share) => estimate * (1 - 0.28 * (1 - share)),
+				groupEstimates[0]
+			);
+			return Math.max(1, Math.round(BASE_POPULATION * combinedShare));
+		}
+
+		function animatePopulation(target) {
+			cancelAnimationFrame(animationFrame);
+			const start = displayedPopulation;
+			const difference = target - start;
+			if (Math.abs(difference) >= 0.5) playCountCue(difference < 0 ? "drop" : "rise");
+			const startedAt = performance.now();
+			const duration = 720;
+			function tick(now) {
+				const progress = Math.min(1, (now - startedAt) / duration);
+				const eased = 1 - Math.pow(1 - progress, 4);
+				displayedPopulation = start + difference * eased;
+				populationNode.textContent = formatPopulation(displayedPopulation);
+				updateRarityDescription(displayedPopulation);
+				if (progress < 1) animationFrame = requestAnimationFrame(tick);
+			}
+			animationFrame = requestAnimationFrame(tick);
+		}
+
+		function renderCategories() {
+			categoryList.innerHTML = categories.map(category => {
+				const isActive = category.id === activeCategory;
+				const selectionCount = selected.get(category.id)?.size || 0;
+				return `<button class="category-button" type="button" data-category="${category.id}" aria-pressed="${isActive}">
+					<span class="category-icon" aria-hidden="true">${category.icon}</span>
+					<span class="category-name">${category.name}</span>
+					<span class="category-status${selectionCount ? " is-set" : ""}" aria-label="${selectionCount ? `${selectionCount} selected` : "Nothing selected"}">${selectionCount || "·"}</span>
+				</button>`;
+			}).join("");
+		}
+
+		function renderTraitPanel() {
+			const category = categories.find(item => item.id === activeCategory);
+			const categorySelection = selected.get(category.id) || new Set();
+			const hint = category.mode === "single" ? "Choose one" : "Choose any that fit";
+			traitPanel.innerHTML = `<div class="trait-panel-head">
+				<h2 class="trait-panel-title">${category.name}</h2>
+				<span class="trait-panel-hint">${hint}</span>
+			</div>
+			<div class="trait-options">${category.traits.map(trait => `
+				<button class="trait-chip" type="button" data-trait="${trait.id}" aria-pressed="${categorySelection.has(trait.id)}">${trait.name}</button>
+			`).join("")}</div>
+			${categorySelection.size ? `<button class="clear-category" type="button" data-clear="${category.id}">Clear this category</button>` : ""}`;
+		}
+
+		function closeSearch(clearQuery = false) {
+			searchResults.hidden = true;
+			searchInput.setAttribute("aria-expanded", "false");
+			if (clearQuery) searchInput.value = "";
+			searchClear.hidden = !searchInput.value;
+		}
+
+		function renderSearchResults() {
+			const query = searchInput.value.trim().toLowerCase();
+			searchClear.hidden = !query;
+			if (!query) {
+				closeSearch();
+				return;
+			}
+
+			const categoryMatches = categories.filter(category =>
+				[category.name, category.id, ...category.searchTerms].some(value => value.toLowerCase().includes(query))
+			);
+			const traitMatches = categories.flatMap(category => category.traits
+				.filter(trait => trait.name.toLowerCase().includes(query))
+				.map(trait => ({ category, trait }))
+			);
+			const results = [
+				...categoryMatches.map(category => `<button class="search-result" type="button" role="option" data-search-category="${category.id}">
+					<span class="search-result-icon" aria-hidden="true">${category.icon}</span>
+					<span class="search-result-copy"><span class="search-result-title">${category.name}</span><span class="search-result-meta">Category · ${category.traits.length} traits</span></span>
+					<span class="search-result-arrow" aria-hidden="true">›</span>
+				</button>`),
+				...traitMatches.map(({ category, trait }) => `<button class="search-result" type="button" role="option" data-search-category="${category.id}" data-search-trait="${trait.id}">
+					<span class="search-result-icon" aria-hidden="true">${category.icon}</span>
+					<span class="search-result-copy"><span class="search-result-title">${trait.name}</span><span class="search-result-meta">${category.name}</span></span>
+					<span class="search-result-arrow" aria-hidden="true">›</span>
+				</button>`)
+			];
+			searchResults.innerHTML = results.length ? results.join("") : `<p class="search-empty">No matching traits or categories.</p>`;
+			searchResults.hidden = false;
+			searchInput.setAttribute("aria-expanded", "true");
+		}
+
+		function activateCategory(categoryId, traitId = null) {
+			activeCategory = categoryId;
+			if (traitId) {
+				const category = categories.find(item => item.id === categoryId);
+				const categorySelection = new Set(selected.get(categoryId) || []);
+				if (category.mode === "single") selected.set(categoryId, new Set([traitId]));
+				else {
+					categorySelection.add(traitId);
+					selected.set(categoryId, categorySelection);
+				}
+			}
+			closeSearch(true);
+			render();
+			requestAnimationFrame(() => {
+				const categoryButton = categoryList.querySelector(`[data-category="${categoryId}"]`);
+				categoryButton?.scrollIntoView({ block: "nearest" });
+				if (traitId) {
+					const traitButton = traitPanel.querySelector(`[data-trait="${traitId}"]`);
+					traitButton?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+					traitButton?.focus({ preventScroll: true });
+				} else categoryButton?.focus({ preventScroll: true });
+			});
+		}
+
+		function renderSelection() {
+			const traits = getSelectedTraits();
+			if (!traits.length) {
+				selectionFooter.innerHTML = `<span class="selection-placeholder">Your story starts with one small detail.</span>`;
+				return;
+			}
+			const tags = traits.map(({ category, trait }) => `<span class="selection-tag">
+				<span>${category.name}</span><span class="selected-trait-name">${trait.name}</span>
+				<button class="remove-trait" type="button" data-remove-trait="${category.id}:${trait.id}" aria-label="Remove ${trait.name}" title="Remove ${trait.name}">×</button>
+			</span>`).join("");
+			selectionFooter.innerHTML = `${tags}<button class="reset-button" type="button" id="reset-button" aria-label="Reset all traits">
+				<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.2 5.1A5.3 5.3 0 1 1 2.8 9M3.2 2.5v2.8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				Reset
+			</button>`;
+		}
+
+		function updateAvatar() {
+			const traits = getSelectedTraits().map(selection => selection.trait);
+			const merged = Object.assign({}, ...traits.map(trait => trait.look));
+			avatarScene.style.setProperty("--skin", merged.skin || "#bd795b");
+			avatarScene.style.setProperty("--hair", merged.hair || "#392e2b");
+			avatarScene.style.setProperty("--shirt", merged.shirt || "#ef856b");
+			avatarScene.style.setProperty("--eye", merged.eye || "#302a27");
+			avatarScene.style.setProperty("--body-scale", merged.bodyScale || 1);
+			avatarScene.dataset.vibe = merged.vibe || "soft";
+			avatarScene.dataset.hairstyle = merged.hairstyle || "default";
+			avatarScene.dataset.outfit = merged.outfit || "default";
+			avatarScene.classList.toggle("has-glasses", Boolean(merged.glasses));
+			avatarScene.classList.toggle("has-freckles", Boolean(merged.freckles));
+			avatarScene.classList.toggle("has-curls", Boolean(merged.curls));
+			avatarScene.classList.toggle("is-smiling", Boolean(merged.smile));
+			for (const feature of ["beard", "mustache", "earrings", "necklace", "hat", "makeup", "dimples", "blush"]) {
+				avatarScene.classList.toggle(`has-${feature}`, Boolean(merged[feature]));
+			}
+			const label = traits.length ? traits[traits.length - 1].name : "A one-of-a-kind you";
+			document.getElementById("avatar-label-text").textContent = label;
+		}
+
+		function updateSummary() {
+			const count = getSelectedTraits().length;
+			document.getElementById("trait-count").textContent = count ? `${count} ${count === 1 ? "trait" : "traits"} picked` : "No traits yet";
+			document.getElementById("match-description").textContent = count ? "and counting, somewhere out there." : "The whole world is in the running.";
+			document.getElementById("progress-fill").style.width = `${Math.min(100, count / categories.length * 100)}%`;
+		}
+
+		function render() {
+			renderCategories();
+			renderTraitPanel();
+			renderSelection();
+			updateAvatar();
+			updateSummary();
+			animatePopulation(estimatePopulation());
+		}
+
+		categoryList.addEventListener("click", event => {
+			const button = event.target.closest("[data-category]");
+			if (!button) return;
+			activeCategory = button.dataset.category;
+			renderCategories();
+			renderTraitPanel();
+		});
+
+		searchInput.addEventListener("input", renderSearchResults);
+		soundToggle.addEventListener("click", () => {
+			soundEnabled = !soundEnabled;
+			soundToggle.setAttribute("aria-pressed", String(soundEnabled));
+			const label = soundEnabled ? "Turn sound off" : "Turn sound on";
+			soundToggle.setAttribute("aria-label", label);
+			soundToggle.title = label;
+		});
+		searchClear.addEventListener("click", () => {
+			closeSearch(true);
+			searchInput.focus();
+		});
+		searchInput.addEventListener("keydown", event => {
+			if (event.key === "Escape") closeSearch();
+			if (event.key === "ArrowDown" && !searchResults.hidden) {
+				event.preventDefault();
+				searchResults.querySelector(".search-result")?.focus();
+			}
+			if (event.key === "Enter" && !searchResults.hidden) {
+				event.preventDefault();
+				searchResults.querySelector(".search-result")?.click();
+			}
+		});
+		searchResults.addEventListener("click", event => {
+			const result = event.target.closest("[data-search-category]");
+			if (!result) return;
+			activateCategory(result.dataset.searchCategory, result.dataset.searchTrait || null);
+		});
+		document.addEventListener("click", event => {
+			if (!searchWrap.contains(event.target)) closeSearch();
+		});
+
+		traitPanel.addEventListener("click", event => {
+			const chip = event.target.closest("[data-trait]");
+			const clear = event.target.closest("[data-clear]");
+			if (chip) {
+				const category = categories.find(item => item.id === activeCategory);
+				const categorySelection = new Set(selected.get(activeCategory) || []);
+				if (category.mode === "single") {
+					if (categorySelection.has(chip.dataset.trait)) selected.delete(activeCategory);
+					else selected.set(activeCategory, new Set([chip.dataset.trait]));
+				} else {
+					if (categorySelection.has(chip.dataset.trait)) categorySelection.delete(chip.dataset.trait);
+					else categorySelection.add(chip.dataset.trait);
+					if (categorySelection.size) selected.set(activeCategory, categorySelection);
+					else selected.delete(activeCategory);
+				}
+				render();
+				return;
+			}
+			if (clear) {
+				selected.delete(clear.dataset.clear);
+				render();
+			}
+		});
+
+		selectionFooter.addEventListener("click", event => {
+			const remove = event.target.closest("[data-remove-trait]");
+			if (remove) {
+				const [categoryId, traitId] = remove.dataset.removeTrait.split(":");
+				const categorySelection = new Set(selected.get(categoryId) || []);
+				categorySelection.delete(traitId);
+				if (categorySelection.size) selected.set(categoryId, categorySelection);
+				else selected.delete(categoryId);
+				render();
+				return;
+			}
+			if (event.target.closest("#reset-button")) {
+				selected.clear();
+				render();
+			}
+		});
+
+		render();
+	</script>
+</body>
+</html>
